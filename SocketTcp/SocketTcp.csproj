@@ -68,6 +68,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Client\AsyncEventArgsClient.cs" />
+    <Compile Include="Server\AsyncEventArgsServer.cs" />
+    <Compile Include="Common\ByteBuffer.cs" />
+    <Compile Include="Common\MsgCenter.cs" />
+    <Compile Include="SocketManager.cs" />
+    <Compile Include="Common\Singleton.cs" />
+    <Compile Include="Client\SocketClient.cs" />
+    <Compile Include="Server\SocketServer.cs" />
+    <Compile Include="Server\TCPClientState.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -122,6 +131,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

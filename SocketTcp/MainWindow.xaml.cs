@@ -10,6 +10,19 @@ namespace SocketTcp
         public MainWindow()
         {
             InitializeComponent();
+
+            TestClient();
+            TestServer();
+        }
+
+        private void TestClient()
+        {
+            SocketManager.Instance.IniClient();
+        }
+
+        private void TestServer()
+        {
+            SocketManager.Instance.IniServer();
         }
     }
 }
