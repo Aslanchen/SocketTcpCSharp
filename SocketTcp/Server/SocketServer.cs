@@ -262,13 +262,23 @@ namespace SocketTcp.Server
             memStream.Write(bytes, 0, length);
             //Reset to beginning
             memStream.Seek(0, SeekOrigin.Begin);
-            while (RemainingBytes() > 0)
+            while (RemainingBytes() > 4)
             {
-                MemoryStream ms = new MemoryStream();
-                BinaryWriter writer = new BinaryWriter(ms);
-                writer.Write(reader.ReadBytes(length));
-                ms.Seek(0, SeekOrigin.Begin);
-                OnReceivedMessage(client, ms);
+                int messageLen = reader.ReadInt32();
+                if (RemainingBytes() >= messageLen)
+                {
+                    MemoryStream ms = new MemoryStream();
+                    BinaryWriter writer = new BinaryWriter(ms);
+                    writer.Write(reader.ReadBytes(length));
+                    ms.Seek(0, SeekOrigin.Begin);
+                    OnReceivedMessage(client, ms);
+                }
+                else
+                {
+                    //Back up the position two bytes
+                    memStream.Position = memStream.Position - 4;
+                    break;
+                }
             }
             //Create a new stream with any leftover bytes
             byte[] leftover = reader.ReadBytes((int)RemainingBytes());
