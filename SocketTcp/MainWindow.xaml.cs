@@ -13,6 +13,7 @@ namespace SocketTcp
 
             TestClient();
             TestServer();
+            SocketManager.Instance.IniThread();
         }
 
         private void TestClient()
@@ -23,6 +24,16 @@ namespace SocketTcp
         private void TestServer()
         {
             SocketManager.Instance.IniServer();
+        }
+
+        private void button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

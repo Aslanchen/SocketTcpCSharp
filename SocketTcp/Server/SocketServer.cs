@@ -17,7 +17,7 @@ namespace SocketTcp.Server
         /// <summary>
         /// 客户端会话列表
         /// </summary>
-        private List<TCPClientState> _clients;
+        private List<TcpClient> _clients;
 
         private TcpListener listener = null;
         private NetworkStream outStream = null;
@@ -58,11 +58,11 @@ namespace SocketTcp.Server
         /// 触发客户端连接事件
         /// </summary>
         /// <param name="state"></param>
-        private void RaiseClientConnected(TCPClientState state)
+        private void RaiseClientConnected(TcpClient client)
         {
             if (ClientConnected != null)
             {
-                ClientConnected(this, new AsyncEventArgsServer(state));
+                ClientConnected(this, new AsyncEventArgsServer(client));
             }
         }
 
@@ -70,11 +70,11 @@ namespace SocketTcp.Server
         /// 触发客户端连接断开事件
         /// </summary>
         /// <param name="state"></param>
-        private void RaiseClientDisconnected(TCPClientState state)
+        private void RaiseClientDisconnected(TcpClient client)
         {
             if (ClientDisconnected != null)
             {
-                ClientDisconnected(this, new AsyncEventArgsServer(state));
+                ClientDisconnected(this, new AsyncEventArgsServer(client));
             }
         }
 
@@ -83,11 +83,11 @@ namespace SocketTcp.Server
         /// </summary>
         /// <param name="state"></param>
         /// <param name="buffer"></param>
-        private void RaiseDataReceived(TCPClientState state, ByteBuffer buffer)
+        private void RaiseDataReceived(TcpClient client, ByteBuffer buffer)
         {
             if (DataReceived != null)
             {
-                DataReceived(this, new AsyncEventArgsServer(state, buffer));
+                DataReceived(this, new AsyncEventArgsServer(client, buffer));
             }
         }
 
@@ -96,11 +96,11 @@ namespace SocketTcp.Server
         /// </summary>
         /// <param name="state"></param>
         /// <param name="ex"></param>
-        private void RaiseWriteError(TCPClientState state, Exception ex)
+        private void RaiseWriteError(TcpClient client, Exception ex)
         {
             if (WriteError != null)
             {
-                WriteError(this, new AsyncEventArgsServer(state, ex));
+                WriteError(this, new AsyncEventArgsServer(client, ex));
             }
         }
 
@@ -109,18 +109,18 @@ namespace SocketTcp.Server
         /// </summary>
         /// <param name="state"></param>
         /// <param name="ex"></param>
-        private void RaiseOtherException(TCPClientState state, Exception ex)
+        private void RaiseOtherException(TcpClient client, Exception ex)
         {
             if (OtherException != null)
             {
-                OtherException(this, new AsyncEventArgsServer(state, ex));
+                OtherException(this, new AsyncEventArgsServer(client, ex));
             }
         }
         #endregion
 
         public SocketServer(int port)
         {
-            _clients = new List<TCPClientState>();
+            _clients = new List<TcpClient>();
             memStream = new MemoryStream();
             reader = new BinaryReader(memStream);
             listener = new TcpListener(IPAddress.Any, port);
@@ -149,32 +149,31 @@ namespace SocketTcp.Server
             }
 
             TcpClient client = listener.EndAcceptTcpClient(ar);
-            TCPClientState state = new TCPClientState(client);
             lock (_clients)
             {
-                _clients.Add(state);
+                _clients.Add(client);
                 _clientCount++;
-                RaiseClientConnected(state);
+                RaiseClientConnected(client);
             }
 
             outStream = client.GetStream();
-            outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), state);
+            outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
             listener.BeginAcceptTcpClient(new AsyncCallback(AcceptTcpClient), null);
         }
 
         /// <summary>
         /// 发送消息
         /// </summary>
-        public void SendMessage(TCPClientState state, ByteBuffer buffer)
+        public void SendMessage(TcpClient client, ByteBuffer buffer)
         {
-            WriteMessage(state, buffer.ToBytes());
+            WriteMessage(client, buffer.ToBytes());
             buffer.Close();
         }
 
         /// <summary>
         /// 写数据
         /// </summary>
-        private void WriteMessage(TCPClientState state, byte[] message)
+        private void WriteMessage(TcpClient client, byte[] message)
         {
             MemoryStream ms = null;
             using (ms = new MemoryStream())
@@ -183,10 +182,10 @@ namespace SocketTcp.Server
                 BinaryWriter writer = new BinaryWriter(ms);
                 writer.Write(message);
                 writer.Flush();
-                if (state.client != null && state.client.Connected)
+                if (client != null && client.Connected)
                 {
                     byte[] payload = ms.ToArray();
-                    state.NetworkStream.BeginWrite(payload, 0, payload.Length, new AsyncCallback(OnWrite), state);
+                    client.GetStream().BeginWrite(payload, 0, payload.Length, new AsyncCallback(OnWrite), client);
                 }
                 else
                 {
@@ -205,8 +204,8 @@ namespace SocketTcp.Server
                 return;
             }
 
-            TCPClientState state = (TCPClientState)ar.AsyncState;
-            NetworkStream stream = state.NetworkStream;
+            TcpClient client = (TcpClient)ar.AsyncState;
+            NetworkStream stream = client.GetStream();
 
             int bytesRead = 0;
             try
@@ -219,21 +218,21 @@ namespace SocketTcp.Server
                 if (bytesRead < 1)
                 {
                     //包尺寸有问题，断线处理
-                    _clients.Remove(state);
-                    RaiseClientDisconnected(state);
+                    _clients.Remove(client);
+                    RaiseClientDisconnected(client);
                     return;
                 }
-                OnReceive(state, byteBuffer, bytesRead);   //分析数据包内容，抛给逻辑层
+                OnReceive(client, byteBuffer, bytesRead);   //分析数据包内容，抛给逻辑层
                 lock (stream)
                 {
                     //分析完，再次监听服务器发过来的新消息
                     Array.Clear(byteBuffer, 0, byteBuffer.Length);   //清空数组
-                    stream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), state);
+                    stream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
                 }
             }
             catch (Exception ex)
             {
-                RaiseOtherException(state, ex);
+                RaiseOtherException(client, ex);
             }
         }
 
@@ -242,22 +241,22 @@ namespace SocketTcp.Server
         /// </summary>
         private void OnWrite(IAsyncResult ar)
         {
-            TCPClientState state = (TCPClientState)ar.AsyncState;
-            NetworkStream stream = state.NetworkStream;
+            TcpClient client = (TcpClient)ar.AsyncState;
+            NetworkStream stream = client.GetStream();
             try
             {
                 stream.EndWrite(ar);
             }
             catch (Exception ex)
             {
-                RaiseWriteError(state, ex);
+                RaiseWriteError(client, ex);
             }
         }
 
         /// <summary>
         /// 接收到消息
         /// </summary>
-        private void OnReceive(TCPClientState state, byte[] bytes, int length)
+        private void OnReceive(TcpClient client, byte[] bytes, int length)
         {
             memStream.Seek(0, SeekOrigin.End);
             memStream.Write(bytes, 0, length);
@@ -269,7 +268,7 @@ namespace SocketTcp.Server
                 BinaryWriter writer = new BinaryWriter(ms);
                 writer.Write(reader.ReadBytes(length));
                 ms.Seek(0, SeekOrigin.Begin);
-                OnReceivedMessage(state, ms);
+                OnReceivedMessage(client, ms);
             }
             //Create a new stream with any leftover bytes
             byte[] leftover = reader.ReadBytes((int)RemainingBytes());
@@ -289,12 +288,12 @@ namespace SocketTcp.Server
         /// 接收到消息
         /// </summary>
         /// <param name="ms"></param>
-        private void OnReceivedMessage(TCPClientState state, MemoryStream ms)
+        private void OnReceivedMessage(TcpClient client, MemoryStream ms)
         {
             BinaryReader r = new BinaryReader(ms);
             byte[] message = r.ReadBytes((int)ms.Length);
             ByteBuffer buffer = new ByteBuffer(message);
-            RaiseDataReceived(state, buffer);
+            RaiseDataReceived(client, buffer);
         }
 
         /// <summary>
@@ -320,7 +319,7 @@ namespace SocketTcp.Server
 
         private void CloseAllClient()
         {
-            foreach (TCPClientState client in _clients)
+            foreach (TcpClient client in _clients)
             {
                 Close(client);
             }
@@ -328,12 +327,12 @@ namespace SocketTcp.Server
             _clients.Clear();
         }
 
-        public void Close(TCPClientState state)
+        public void Close(TcpClient client)
         {
-            if (state != null)
+            if (client != null)
             {
-                state.Close();
-                _clients.Remove(state);
+                client.Close();
+                _clients.Remove(client);
                 _clientCount--;
             }
         }

@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using System;
 using SocketTcp.Client;
 using SocketTcp.Common;
 using SocketTcp.Server;
+using SocketTcp.Model;
 
 namespace SocketTcp
 {
@@ -10,8 +10,8 @@ namespace SocketTcp
     {
         private SocketClient client;
         private SocketServer server;
-        private static readonly object m_lockObject = new object();
-        private static Queue<KeyValuePair<ushort, byte[]>> mEvents = new Queue<KeyValuePair<ushort, byte[]>>();
+        private OutThread threadOut;
+        private InThread threadIn;
 
         public void IniClient()
         {
@@ -36,7 +36,8 @@ namespace SocketTcp
 
         private void Client_DataReceived(object sender, AsyncEventArgsClient e)
         {
-            Console.WriteLine("Client_DataReceived");
+            DataModel item = new DataModel(e.buffer);
+            threadIn.Enqueue(item);
         }
 
         private void Client_ServerDisconnected(object sender, AsyncEventArgsClient e)
@@ -72,7 +73,8 @@ namespace SocketTcp
 
         private void Server_DataReceived(object sender, AsyncEventArgsServer e)
         {
-            Console.WriteLine("Server_DataReceived");
+            DataModel item = new DataModel(e.client, e.buffer);
+            threadIn.Enqueue(item);
         }
 
         private void Server_ClientDisconnected(object sender, AsyncEventArgsServer e)
@@ -85,29 +87,31 @@ namespace SocketTcp
             Console.WriteLine("Server_ClientConnected");
         }
 
-        ///------------------------------------------------------------------------------------
-        public void AddEvent(ushort _event, byte[] data)
+        public void IniThread()
         {
-            lock (m_lockObject)
-            {
-                Console.WriteLine("OnReceive:" + _event);
-                mEvents.Enqueue(new KeyValuePair<ushort, byte[]>(_event, data));
-            }
+            threadIn = new InThread();
+            threadIn.Start();
+
+            threadOut = new OutThread();
+            threadOut.Start();
         }
 
-        /// <summary>
-        /// 交给Command，这里不想关心发给谁。
-        /// </summary>
-        public void Update()
+        public void OnMsg(DataModel item)
         {
-            if (mEvents.Count > 0)
-            {
-                while (mEvents.Count > 0)
-                {
-                    KeyValuePair<ushort, byte[]> _event = mEvents.Dequeue();
-                    MsgCenter.Instance.OnMsg(_event.Key, _event.Value);
-                }
-            }
+            Console.WriteLine("OnMsg");
+            //MsgCenter.Instance.OnMsg();
+        }
+
+        public void AddMessage(DataModel item)
+        {
+            threadOut.Enqueue(item);
+        }
+
+        public void SendMessage(DataModel item)
+        {
+            Console.WriteLine("SendMessage");
+            client.SendMessage(item.buffer);
+            server.SendMessage(item.client, item.buffer);
         }
 
         /// <summary>
@@ -117,8 +121,9 @@ namespace SocketTcp
         {
             client.Close();
             server.Stop();
+            threadOut.Stop();
+            threadIn.Stop();
         }
-
 
         //public void FormatData(ushort type, IMessage message)
         //{

@@ -7,6 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <Button x:Name="button" Content="客户端发送" HorizontalAlignment="Left" Margin="205,72,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
+        <Button x:Name="button1" Content="服务端发送" HorizontalAlignment="Left" Margin="205,155,0,0" VerticalAlignment="Top" Width="75" Click="button1_Click"/>
+
     </Grid>
 </Window>

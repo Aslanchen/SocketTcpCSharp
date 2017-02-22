@@ -69,6 +69,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Client\AsyncEventArgsClient.cs" />
+    <Compile Include="InThread.cs" />
+    <Compile Include="OutThread.cs" />
+    <Compile Include="Model\DataModel.cs" />
     <Compile Include="Server\AsyncEventArgsServer.cs" />
     <Compile Include="Common\ByteBuffer.cs" />
     <Compile Include="Common\MsgCenter.cs" />
@@ -76,7 +79,6 @@
     <Compile Include="Common\Singleton.cs" />
     <Compile Include="Client\SocketClient.cs" />
     <Compile Include="Server\SocketServer.cs" />
-    <Compile Include="Server\TCPClientState.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

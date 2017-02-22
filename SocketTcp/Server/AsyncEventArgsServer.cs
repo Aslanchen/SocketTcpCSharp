@@ -1,5 +1,6 @@
 ﻿using SocketTcp.Common;
 using System;
+using System.Net.Sockets;
 
 namespace SocketTcp.Server
 {
@@ -19,24 +20,24 @@ namespace SocketTcp.Server
         public ByteBuffer buffer;
 
         /// <summary>
-        /// 客户端状态封装类
+        /// 客户端
         /// </summary>
-        public TCPClientState state;
+        public TcpClient client;
 
-        public AsyncEventArgsServer(TCPClientState state)
+        public AsyncEventArgsServer(TcpClient client)
         {
-            this.state = state;
+            this.client = client;
         }
 
-        public AsyncEventArgsServer(TCPClientState state, ByteBuffer buffer)
+        public AsyncEventArgsServer(TcpClient client, ByteBuffer buffer)
         {
-            this.state = state;
+            this.client = client;
             this.buffer = buffer;
         }
 
-        public AsyncEventArgsServer(TCPClientState state, Exception ex)
+        public AsyncEventArgsServer(TcpClient client, Exception ex)
         {
-            this.state = state;
+            this.client = client;
             this.ex = ex;
         }
     }
