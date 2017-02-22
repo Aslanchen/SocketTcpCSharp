@@ -275,7 +275,6 @@ namespace SocketTcp.Server
                 }
                 else
                 {
-                    //Back up the position two bytes
                     memStream.Position = memStream.Position - 4;
                     break;
                 }
