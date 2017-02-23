@@ -78,8 +78,7 @@ namespace SocketTcp.Common
 
         public string ReadString()
         {
-            byte[] buffer = new byte[stream.Length];
-            buffer = reader.ReadBytes((int)stream.Length);
+            byte[] buffer = reader.ReadBytes((int)(stream.Length - stream.Position));
             return Encoding.UTF8.GetString(buffer);
         }
 

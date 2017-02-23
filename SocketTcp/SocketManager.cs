@@ -108,7 +108,12 @@ namespace SocketTcp
         public void OnMsg(DataModel item)
         {
             Console.WriteLine("OnMsg");
-            //MsgCenter.Instance.OnMsg();
+            TcpClient client = item.client;
+            ByteBuffer buffer = item.buffer;
+
+            ushort type = buffer.ReadShort();
+            string message = buffer.ReadString();
+            //MsgCenter.Instance.OnMsg(type, message);
         }
 
         public void AddMessage(DataModel item)
