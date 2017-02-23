@@ -69,7 +69,77 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Client\AsyncEventArgsClient.cs" />
+    <Compile Include="Common\Google.Protobuf\ByteArray.cs" />
+    <Compile Include="Common\Google.Protobuf\ByteString.cs" />
+    <Compile Include="Common\Google.Protobuf\CodedInputStream.cs" />
+    <Compile Include="Common\Google.Protobuf\CodedOutputStream.ComputeSize.cs" />
+    <Compile Include="Common\Google.Protobuf\CodedOutputStream.cs" />
+    <Compile Include="Common\Google.Protobuf\Collections\MapField.cs" />
+    <Compile Include="Common\Google.Protobuf\Collections\ReadOnlyDictionary.cs" />
+    <Compile Include="Common\Google.Protobuf\Collections\RepeatedField.cs" />
+    <Compile Include="Common\Google.Protobuf\Compatibility\PropertyInfoExtensions.cs" />
+    <Compile Include="Common\Google.Protobuf\FieldCodec.cs" />
+    <Compile Include="Common\Google.Protobuf\FrameworkPortability.cs" />
+    <Compile Include="Common\Google.Protobuf\ICustomDiagnosticMessage.cs" />
+    <Compile Include="Common\Google.Protobuf\IDeepCloneable.cs" />
+    <Compile Include="Common\Google.Protobuf\IMessage.cs" />
+    <Compile Include="Common\Google.Protobuf\InvalidJsonException.cs" />
+    <Compile Include="Common\Google.Protobuf\InvalidProtocolBufferException.cs" />
+    <Compile Include="Common\Google.Protobuf\JsonFormatter.cs" />
+    <Compile Include="Common\Google.Protobuf\JsonParser.cs" />
+    <Compile Include="Common\Google.Protobuf\JsonToken.cs" />
+    <Compile Include="Common\Google.Protobuf\JsonTokenizer.cs" />
+    <Compile Include="Common\Google.Protobuf\LimitedInputStream.cs" />
+    <Compile Include="Common\Google.Protobuf\MessageExtensions.cs" />
+    <Compile Include="Common\Google.Protobuf\MessageParser.cs" />
+    <Compile Include="Common\Google.Protobuf\ProtoPreconditions.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\Descriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\DescriptorBase.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\DescriptorPool.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\DescriptorUtil.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\DescriptorValidationException.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\EnumDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\EnumValueDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\FieldAccessorBase.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\FieldDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\FieldType.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\FileDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\GeneratedClrTypeInfo.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\IDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\IFieldAccessor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\MapFieldAccessor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\MessageDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\MethodDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\OneofAccessor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\OneofDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\OriginalNameAttribute.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\PackageDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\PartialClasses.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\ReflectionUtil.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\RepeatedFieldAccessor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\ServiceDescriptor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\SingleFieldAccessor.cs" />
+    <Compile Include="Common\Google.Protobuf\Reflection\TypeRegistry.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Any.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\AnyPartial.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Api.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Duration.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\DurationPartial.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Empty.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\FieldMask.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\FieldMaskPartial.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\SourceContext.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Struct.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\TimeExtensions.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Timestamp.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\TimestampPartial.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Type.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\ValuePartial.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\Wrappers.cs" />
+    <Compile Include="Common\Google.Protobuf\WellKnownTypes\WrappersPartial.cs" />
+    <Compile Include="Common\Google.Protobuf\WireFormat.cs" />
     <Compile Include="InThread.cs" />
+    <Compile Include="Model\Protocl\TestModel.cs" />
     <Compile Include="OutThread.cs" />
     <Compile Include="Model\DataModel.cs" />
     <Compile Include="Server\AsyncEventArgsServer.cs" />
@@ -110,6 +180,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Common\Google.Protobuf\Google.Protobuf.xproj" />
+    <None Include="Common\Google.Protobuf\project.json" />
+    <None Include="Common\Google.Protobuf\project.lock.json" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -133,7 +206,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Common\Google.Protobuf\Google.Protobuf.xproj.user" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -6,6 +6,7 @@ using SocketTcp.Model;
 using System.Text;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using Google.Protobuf;
 
 namespace SocketTcp
 {
@@ -112,8 +113,8 @@ namespace SocketTcp
             ByteBuffer buffer = item.buffer;
 
             ushort type = buffer.ReadShort();
-            string message = buffer.ReadString();
-            //MsgCenter.Instance.OnMsg(type, message);
+            byte[] message = buffer.ReadBytes();
+            MsgCenter.Instance.OnMsg(type, message);
         }
 
         public void AddMessage(DataModel item)
@@ -162,6 +163,25 @@ namespace SocketTcp
             else
             {
                 byte[] data = Encoding.UTF8.GetBytes(message);
+                buffer.WriteInt((uint)(2 + data.Length));
+                buffer.WriteShort(type);
+                buffer.WriteBytes(data);
+            }
+            return buffer;
+        }
+
+        public ByteBuffer FormatData(ushort type, IMessage message)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            Console.WriteLine(String.Format("发-{0} 数据-{1}", type, message == null ? "无数据" : message.ToString()));
+            if (message == null)
+            {
+                buffer.WriteInt(2);
+                buffer.WriteShort(type);
+            }
+            else
+            {
+                byte[] data = message.ToByteArray();
                 buffer.WriteInt((uint)(2 + data.Length));
                 buffer.WriteShort(type);
                 buffer.WriteBytes(data);

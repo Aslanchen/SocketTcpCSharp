@@ -82,9 +82,9 @@ namespace SocketTcp.Common
             return Encoding.UTF8.GetString(buffer);
         }
 
-        public byte[] ReadBytes(int len)
+        public byte[] ReadBytes()
         {
-            return reader.ReadBytes(len);
+            return reader.ReadBytes((int)(stream.Length - stream.Position));
         }
 
         public byte[] ToBytes()

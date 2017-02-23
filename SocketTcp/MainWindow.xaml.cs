@@ -3,6 +3,7 @@ using SocketTcp.Model;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Windows;
+using SocketTcp.Model.Protocl;
 
 namespace SocketTcp
 {
@@ -18,6 +19,17 @@ namespace SocketTcp
             TestClient();
             TestServer();
             SocketManager.Instance.IniThread();
+
+            MsgCenter.Instance.RegisterMsg(100, (byteData) =>
+             {
+                 Test data = Test.Parser.ParseFrom(byteData);
+                 if (data == null)
+                 {
+                     return;
+                 }
+
+                 System.Console.WriteLine("收-100 数据-" + data.ToString());
+             });
         }
 
         private void TestClient()
@@ -32,7 +44,12 @@ namespace SocketTcp
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            ByteBuffer buffer = SocketManager.Instance.FormatData(100, "This is a Test");
+            Test data = new Test()
+            {
+                Name = "test",
+                Address = "This is a Test"
+            };
+            ByteBuffer buffer = SocketManager.Instance.FormatData(100, data);
             DataModel item = new DataModel(buffer);
             SocketManager.Instance.AddMessage(item);
         }
@@ -46,7 +63,12 @@ namespace SocketTcp
             }
 
             TcpClient client = clients[0];
-            ByteBuffer buffer = SocketManager.Instance.FormatData(100, "This is a Test");
+            Test data = new Test()
+            {
+                Name = "test",
+                Address = "This is a Test"
+            };
+            ByteBuffer buffer = SocketManager.Instance.FormatData(100, data);
             DataModel item = new DataModel(client, buffer);
             SocketManager.Instance.AddMessage(item);
         }
