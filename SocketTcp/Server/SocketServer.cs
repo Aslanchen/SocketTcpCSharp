@@ -14,13 +14,14 @@ namespace SocketTcp.Server
         /// </summary>
         private int _clientCount;
 
+        private object lockObject = new object();
+
         /// <summary>
         /// 客户端会话列表
         /// </summary>
         public List<TcpClient> clients { get; set; }
 
         private TcpListener listener = null;
-        private NetworkStream outStream = null;
         private MemoryStream memStream;
         private BinaryReader reader;
 
@@ -149,14 +150,14 @@ namespace SocketTcp.Server
             }
 
             TcpClient client = listener.EndAcceptTcpClient(ar);
-            lock (clients)
+            lock (lockObject)
             {
                 clients.Add(client);
                 _clientCount++;
                 RaiseClientConnected(client);
             }
 
-            outStream = client.GetStream();
+            NetworkStream outStream = client.GetStream();
             outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
             listener.BeginAcceptTcpClient(new AsyncCallback(AcceptTcpClient), null);
         }
@@ -210,7 +211,7 @@ namespace SocketTcp.Server
             int bytesRead = 0;
             try
             {
-                lock (stream)
+                lock (lockObject)
                 {
                     //读取字节流到缓冲区
                     bytesRead = stream.EndRead(ar);
@@ -223,7 +224,7 @@ namespace SocketTcp.Server
                     return;
                 }
                 OnReceive(client, byteBuffer, bytesRead);   //分析数据包内容，抛给逻辑层
-                lock (stream)
+                lock (lockObject)
                 {
                     //分析完，再次监听服务器发过来的新消息
                     Array.Clear(byteBuffer, 0, byteBuffer.Length);   //清空数组
@@ -316,7 +317,7 @@ namespace SocketTcp.Server
             }
 
             listener.Stop();
-            lock (clients)
+            lock (lockObject)
             {
                 //关闭所有客户端连接
                 CloseAllClient();
