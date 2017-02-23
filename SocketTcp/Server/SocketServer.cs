@@ -17,7 +17,7 @@ namespace SocketTcp.Server
         /// <summary>
         /// 客户端会话列表
         /// </summary>
-        private List<TcpClient> _clients;
+        public List<TcpClient> clients { get; set; }
 
         private TcpListener listener = null;
         private NetworkStream outStream = null;
@@ -120,7 +120,7 @@ namespace SocketTcp.Server
 
         public SocketServer(int port)
         {
-            _clients = new List<TcpClient>();
+            clients = new List<TcpClient>();
             memStream = new MemoryStream();
             reader = new BinaryReader(memStream);
             listener = new TcpListener(IPAddress.Any, port);
@@ -149,9 +149,9 @@ namespace SocketTcp.Server
             }
 
             TcpClient client = listener.EndAcceptTcpClient(ar);
-            lock (_clients)
+            lock (clients)
             {
-                _clients.Add(client);
+                clients.Add(client);
                 _clientCount++;
                 RaiseClientConnected(client);
             }
@@ -218,7 +218,7 @@ namespace SocketTcp.Server
                 if (bytesRead < 1)
                 {
                     //包尺寸有问题，断线处理
-                    _clients.Remove(client);
+                    clients.Remove(client);
                     RaiseClientDisconnected(client);
                     return;
                 }
@@ -316,7 +316,7 @@ namespace SocketTcp.Server
             }
 
             listener.Stop();
-            lock (_clients)
+            lock (clients)
             {
                 //关闭所有客户端连接
                 CloseAllClient();
@@ -328,12 +328,12 @@ namespace SocketTcp.Server
 
         private void CloseAllClient()
         {
-            foreach (TcpClient client in _clients)
+            foreach (TcpClient client in clients)
             {
                 Close(client);
             }
             _clientCount = 0;
-            _clients.Clear();
+            clients.Clear();
         }
 
         public void Close(TcpClient client)
@@ -341,7 +341,7 @@ namespace SocketTcp.Server
             if (client != null)
             {
                 client.Close();
-                _clients.Remove(client);
+                clients.Remove(client);
                 _clientCount--;
             }
         }

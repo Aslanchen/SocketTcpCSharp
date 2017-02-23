@@ -3,6 +3,9 @@ using SocketTcp.Client;
 using SocketTcp.Common;
 using SocketTcp.Server;
 using SocketTcp.Model;
+using System.Text;
+using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace SocketTcp
 {
@@ -116,8 +119,19 @@ namespace SocketTcp
         public void SendMessage(DataModel item)
         {
             Console.WriteLine("SendMessage");
-            client.SendMessage(item.buffer);
-            server.SendMessage(item.client, item.buffer);
+            if (item.client == null)
+            {
+                client.SendMessage(item.buffer);
+            }
+            else
+            {
+                server.SendMessage(item.client, item.buffer);
+            }
+        }
+
+        public List<TcpClient> GetClients()
+        {
+            return server.clients;
         }
 
         /// <summary>
@@ -131,21 +145,23 @@ namespace SocketTcp
             threadIn.Stop();
         }
 
-        //public void FormatData(ushort type, IMessage message)
-        //{
-        //    Console.WriteLine(String.Format("发-{0} 数据-{1}", type, message == null ? "无数据" : message.ToString()));
-        //    if (message == null)
-        //    {
-        //        WriteInt(2);
-        //        WriteShort(type);
-        //    }
-        //    else
-        //    {
-        //        byte[] data = message.ToByteArray();
-        //        WriteInt((uint)(2 + data.Length));
-        //        WriteShort(type);
-        //        WriteBytes(data);
-        //    }
-        //}
+        public ByteBuffer FormatData(ushort type, string message)
+        {
+            ByteBuffer buffer = new ByteBuffer();
+            Console.WriteLine(String.Format("发-{0} 数据-{1}", type, message == null ? "无数据" : message));
+            if (message == null)
+            {
+                buffer.WriteInt(2);
+                buffer.WriteShort(type);
+            }
+            else
+            {
+                byte[] data = Encoding.UTF8.GetBytes(message);
+                buffer.WriteInt((uint)(2 + data.Length));
+                buffer.WriteShort(type);
+                buffer.WriteBytes(data);
+            }
+            return buffer;
+        }
     }
 }
