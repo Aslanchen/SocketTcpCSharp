@@ -7,7 +7,7 @@ namespace SocketTcp.Client
 {
     public class SocketClient
     {
-        public bool loggedIn = false;
+        public bool isConnected = false;
 
         private TcpClient client = null;
         private NetworkStream outStream = null;
@@ -19,11 +19,15 @@ namespace SocketTcp.Client
 
         #region 事件
         /// <summary>
-        /// 服务端连接事件
+        /// 连接事件
         /// </summary>
         public event EventHandler<AsyncEventArgsClient> ServerConnected;
         /// <summary>
-        /// 服务端连接断开事件
+        /// 连接异常事件
+        /// </summary>
+        public event EventHandler<AsyncEventArgsClient> ServerConnectedException;
+        /// <summary>
+        /// 连接断开事件
         /// </summary>
         public event EventHandler<AsyncEventArgsClient> ServerDisconnected;
         /// <summary>
@@ -40,13 +44,24 @@ namespace SocketTcp.Client
         public event EventHandler<AsyncEventArgsClient> OtherException;
 
         /// <summary>
-        /// 服务端连接事件
+        /// 连接事件
         /// </summary>
         private void RaiseServerConnected()
         {
             if (ServerConnected != null)
             {
                 ServerConnected(this, new AsyncEventArgsClient());
+            }
+        }
+
+        /// <summary>
+        /// 连接异常事件
+        /// </summary>
+        private void RaiseServerConnectedException(Exception ex)
+        {
+            if (ServerConnectedException != null)
+            {
+                ServerConnectedException(this, new AsyncEventArgsClient(ex));
             }
         }
 
@@ -79,7 +94,7 @@ namespace SocketTcp.Client
         /// <param name="ex"></param>
         private void RaiseWriteException(Exception ex)
         {
-            if (DataReceived != null)
+            if (WriteException != null)
             {
                 WriteException(this, new AsyncEventArgsClient(ex));
             }
@@ -123,9 +138,18 @@ namespace SocketTcp.Client
         /// </summary>
         private void OnConnect(IAsyncResult asr)
         {
-            loggedIn = true;
-            outStream = client.GetStream();
-            client.GetStream().BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), null);
+            try
+            {
+                outStream = client.GetStream();
+                outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), null);
+            }
+            catch (Exception ex)
+            {
+                RaiseServerConnectedException(ex);
+                return;
+            }
+
+            isConnected = true;
             RaiseServerConnected();
         }
 
@@ -276,7 +300,7 @@ namespace SocketTcp.Client
                 if (client.Connected) client.Close();
                 client = null;
             }
-            loggedIn = false;
+            isConnected = false;
 
             reader.Close();
             memStream.Close();

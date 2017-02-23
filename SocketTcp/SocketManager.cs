@@ -17,11 +17,17 @@ namespace SocketTcp
         {
             client = new SocketClient();
             client.ServerConnected += Client_ServerConnected;
+            client.ServerConnectedException += Client_ServerConnectedException;
             client.ServerDisconnected += Client_ServerDisconnected;
             client.DataReceived += Client_DataReceived;
             client.OtherException += Client_OtherException;
             client.WriteException += Client_WriteException;
             client.ConnectServer("127.0.0.1", 6666);
+        }
+
+        private void Client_ServerConnectedException(object sender, AsyncEventArgsClient e)
+        {
+            Console.WriteLine("Client_ServerConnectedException");
         }
 
         private void Client_WriteException(object sender, AsyncEventArgsClient e)
