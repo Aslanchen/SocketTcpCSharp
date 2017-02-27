@@ -26,6 +26,7 @@ namespace SocketTcp
         public void Stop()
         {
             RUN = false;
+            are.Dispose();
             thread.Interrupt();
         }
 
