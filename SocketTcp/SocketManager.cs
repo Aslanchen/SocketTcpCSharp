@@ -24,7 +24,6 @@ namespace SocketTcp
             client.ServerConnectedException += Client_ServerConnectedException;
             client.ServerDisconnected += Client_ServerDisconnected;
             client.DataReceived += Client_DataReceived;
-            client.OtherException += Client_OtherException;
             client.WriteException += Client_WriteException;
             client.ConnectServer("127.0.0.1", 6666);
         }
@@ -66,7 +65,6 @@ namespace SocketTcp
             server.ClientConnected += Server_ClientConnected;
             server.ClientDisconnected += Server_ClientDisconnected;
             server.DataReceived += Server_DataReceived;
-            server.OtherException += Server_OtherException;
             server.WriteError += Server_WriteError;
             server.Start();
         }
@@ -154,7 +152,7 @@ namespace SocketTcp
         public ByteBuffer FormatData(ushort type, string message)
         {
             ByteBuffer buffer = new ByteBuffer();
-            Console.WriteLine(String.Format("发-{0} 数据-{1}", type, message == null ? "无数据" : message));
+            Console.WriteLine($"发-{type} 数据-{message}");
             if (message == null)
             {
                 buffer.WriteInt(2);
@@ -173,7 +171,8 @@ namespace SocketTcp
         public ByteBuffer FormatData(ushort type, IMessage message)
         {
             ByteBuffer buffer = new ByteBuffer();
-            Console.WriteLine(String.Format("发-{0} 数据-{1}", type, message == null ? "无数据" : message.ToString()));
+            String messageString = message == null ? "无数据" : message.ToString();
+            Console.WriteLine($"发-{type} 数据-{messageString}");
             if (message == null)
             {
                 buffer.WriteInt(2);
