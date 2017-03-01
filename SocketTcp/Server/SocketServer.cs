@@ -50,10 +50,6 @@ namespace SocketTcp.Server
         /// 写异常事件
         /// </summary>
         public event EventHandler<AsyncEventArgsServer> WriteError;
-        /// <summary>
-        /// 异常事件
-        /// </summary>
-        public event EventHandler<AsyncEventArgsServer> OtherException;
 
         /// <summary>
         /// 触发客户端连接事件
@@ -102,19 +98,6 @@ namespace SocketTcp.Server
             if (WriteError != null)
             {
                 WriteError(this, new AsyncEventArgsServer(client, ex));
-            }
-        }
-
-        /// <summary>
-        /// 触发异常事件
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="ex"></param>
-        private void RaiseOtherException(TcpClient client, Exception ex)
-        {
-            if (OtherException != null)
-            {
-                OtherException(this, new AsyncEventArgsServer(client, ex));
             }
         }
         #endregion
@@ -231,9 +214,9 @@ namespace SocketTcp.Server
                     stream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                RaiseOtherException(client, ex);
+                RaiseClientDisconnected(client);
             }
         }
 
