@@ -114,7 +114,16 @@ namespace SocketTcp.Client
             client.SendTimeout = 1000;
             client.ReceiveTimeout = 1000;
             client.NoDelay = true;
-            client.BeginConnect(host, port, new AsyncCallback(OnConnect), null);
+
+            try
+            {
+                client.BeginConnect(host, port, new AsyncCallback(OnConnect), null);
+            }
+            catch (Exception e)
+            {
+                Close();
+                RaiseServerConnectedException(e);
+            }
         }
 
         /// <summary>
@@ -168,10 +177,12 @@ namespace SocketTcp.Client
             int bytesRead = 0;
             try
             {
-                lock (client.GetStream())
+                NetworkStream stream = client.GetStream();
+
+                lock (stream)
                 {
                     //读取字节流到缓冲区
-                    bytesRead = client.GetStream().EndRead(asr);
+                    bytesRead = stream.EndRead(asr);
                 }
                 if (bytesRead < 1)
                 {
@@ -180,7 +191,7 @@ namespace SocketTcp.Client
                     return;
                 }
                 OnReceive(byteBuffer, bytesRead);   //分析数据包内容，抛给逻辑层
-                lock (client.GetStream())
+                lock (stream)
                 {
                     //分析完，再次监听服务器发过来的新消息
                     Array.Clear(byteBuffer, 0, byteBuffer.Length);   //清空数组

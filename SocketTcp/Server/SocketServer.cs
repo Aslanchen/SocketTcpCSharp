@@ -189,11 +189,11 @@ namespace SocketTcp.Server
             }
 
             TcpClient client = (TcpClient)ar.AsyncState;
-            NetworkStream stream = client.GetStream();
-
-            int bytesRead = 0;
             try
             {
+                NetworkStream stream = client.GetStream();
+
+                int bytesRead = 0;
                 lock (lockObject)
                 {
                     //读取字节流到缓冲区
@@ -226,9 +226,9 @@ namespace SocketTcp.Server
         private void OnWrite(IAsyncResult ar)
         {
             TcpClient client = (TcpClient)ar.AsyncState;
-            NetworkStream stream = client.GetStream();
             try
             {
+                NetworkStream stream = client.GetStream();
                 stream.EndWrite(ar);
             }
             catch (Exception ex)
