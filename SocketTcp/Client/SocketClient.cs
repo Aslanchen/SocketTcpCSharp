@@ -195,7 +195,7 @@ namespace SocketTcp.Client
                 {
                     //分析完，再次监听服务器发过来的新消息
                     Array.Clear(byteBuffer, 0, byteBuffer.Length);   //清空数组
-                    client.GetStream().BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), null);
+                    stream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), null);
                 }
             }
             catch (Exception)
