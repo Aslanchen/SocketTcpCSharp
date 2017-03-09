@@ -34,10 +34,6 @@ namespace SocketTcp.Client
         /// 接收到数据事件
         /// </summary>
         public event EventHandler<AsyncEventArgsClient> DataReceived;
-        /// <summary>
-        /// 写异常事件
-        /// </summary>
-        public event EventHandler<AsyncEventArgsClient> WriteException;
 
         /// <summary>
         /// 连接事件
@@ -81,18 +77,6 @@ namespace SocketTcp.Client
             if (DataReceived != null)
             {
                 DataReceived(this, new AsyncEventArgsClient(buffer));
-            }
-        }
-
-        /// <summary>
-        /// 写异常事件
-        /// </summary>
-        /// <param name="ex"></param>
-        private void RaiseWriteException(Exception ex)
-        {
-            if (WriteException != null)
-            {
-                WriteException(this, new AsyncEventArgsClient(ex));
             }
         }
         #endregion
@@ -157,14 +141,15 @@ namespace SocketTcp.Client
                 BinaryWriter writer = new BinaryWriter(ms);
                 writer.Write(message);
                 writer.Flush();
-                if (client != null && client.Connected)
+
+                try
                 {
                     byte[] payload = ms.ToArray();
                     outStream.BeginWrite(payload, 0, payload.Length, new AsyncCallback(OnWrite), null);
                 }
-                else
+                catch (Exception)
                 {
-                    RaiseWriteException(new Exception("连接断开"));
+                    RaiseServerDisconnected();
                 }
             }
         }
@@ -226,9 +211,9 @@ namespace SocketTcp.Client
             {
                 outStream.EndWrite(ar);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                RaiseWriteException(ex);
+                RaiseServerDisconnected();
             }
         }
 

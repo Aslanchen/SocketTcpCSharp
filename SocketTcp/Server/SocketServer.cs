@@ -46,10 +46,6 @@ namespace SocketTcp.Server
         /// 接收到数据事件
         /// </summary>
         public event EventHandler<AsyncEventArgsServer> DataReceived;
-        /// <summary>
-        /// 写异常事件
-        /// </summary>
-        public event EventHandler<AsyncEventArgsServer> WriteError;
 
         /// <summary>
         /// 触发客户端连接事件
@@ -85,19 +81,6 @@ namespace SocketTcp.Server
             if (DataReceived != null)
             {
                 DataReceived(this, new AsyncEventArgsServer(client, buffer));
-            }
-        }
-
-        /// <summary>
-        /// 写异常事件
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="ex"></param>
-        private void RaiseWriteError(TcpClient client, Exception ex)
-        {
-            if (WriteError != null)
-            {
-                WriteError(this, new AsyncEventArgsServer(client, ex));
             }
         }
         #endregion
@@ -159,21 +142,21 @@ namespace SocketTcp.Server
         /// </summary>
         private void WriteMessage(TcpClient client, byte[] message)
         {
-            MemoryStream ms = null;
-            using (ms = new MemoryStream())
+            using (MemoryStream ms = new MemoryStream())
             {
                 ms.Position = 0;
                 BinaryWriter writer = new BinaryWriter(ms);
                 writer.Write(message);
                 writer.Flush();
-                if (client != null && client.Connected)
+
+                try
                 {
                     byte[] payload = ms.ToArray();
                     client.GetStream().BeginWrite(payload, 0, payload.Length, new AsyncCallback(OnWrite), client);
                 }
-                else
+                catch (Exception)
                 {
-                    Console.WriteLine("client.connected----->>false");
+                    RaiseClientDisconnected(client);
                 }
             }
         }
@@ -231,9 +214,9 @@ namespace SocketTcp.Server
                 NetworkStream stream = client.GetStream();
                 stream.EndWrite(ar);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                RaiseWriteError(client, ex);
+                RaiseClientDisconnected(client);
             }
         }
 
