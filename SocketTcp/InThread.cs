@@ -26,7 +26,6 @@ namespace SocketTcp
         public void Stop()
         {
             RUN = false;
-            are.Set();
             are.Dispose();
             thread.Interrupt();
         }
@@ -41,13 +40,22 @@ namespace SocketTcp
         {
             while (RUN)
             {
-                are.WaitOne();
-
                 DataModel item;
                 queue.TryDequeue(out item);
+
                 if (item != null)
                 {
                     SocketManager.Instance.OnMsg(item);
+                }
+                else
+                {
+                    try
+                    {
+                        are.WaitOne();
+                    }
+                    catch (Exception)
+                    {
+                    }
                 }
             }
         }
