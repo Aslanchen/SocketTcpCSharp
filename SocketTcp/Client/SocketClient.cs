@@ -34,10 +34,6 @@ namespace SocketTcp.Client
         /// 接收到数据事件
         /// </summary>
         public event EventHandler<AsyncEventArgsClient> DataReceived;
-        /// <summary>
-        /// 写异常事件
-        /// </summary>
-        public event EventHandler<AsyncEventArgsClient> WriteException;
 
         /// <summary>
         /// 连接事件
@@ -83,18 +79,6 @@ namespace SocketTcp.Client
                 DataReceived(this, new AsyncEventArgsClient(buffer));
             }
         }
-
-        /// <summary>
-        /// 写异常事件
-        /// </summary>
-        /// <param name="ex"></param>
-        private void RaiseWriteException(Exception ex)
-        {
-            if (WriteException != null)
-            {
-                WriteException(this, new AsyncEventArgsClient(ex));
-            }
-        }
         #endregion
 
         // Use this for initialization
@@ -114,7 +98,16 @@ namespace SocketTcp.Client
             client.SendTimeout = 1000;
             client.ReceiveTimeout = 1000;
             client.NoDelay = true;
-            client.BeginConnect(host, port, new AsyncCallback(OnConnect), null);
+
+            try
+            {
+                client.BeginConnect(host, port, new AsyncCallback(OnConnect), null);
+            }
+            catch (Exception e)
+            {
+                Close();
+                RaiseServerConnectedException(e);
+            }
         }
 
         /// <summary>
@@ -148,14 +141,15 @@ namespace SocketTcp.Client
                 BinaryWriter writer = new BinaryWriter(ms);
                 writer.Write(message);
                 writer.Flush();
-                if (client != null && client.Connected)
+
+                try
                 {
                     byte[] payload = ms.ToArray();
                     outStream.BeginWrite(payload, 0, payload.Length, new AsyncCallback(OnWrite), null);
                 }
-                else
+                catch (Exception)
                 {
-                    RaiseWriteException(new Exception("连接断开"));
+                    RaiseServerDisconnected();
                 }
             }
         }
@@ -168,10 +162,12 @@ namespace SocketTcp.Client
             int bytesRead = 0;
             try
             {
-                lock (client.GetStream())
+                NetworkStream stream = client.GetStream();
+
+                lock (stream)
                 {
                     //读取字节流到缓冲区
-                    bytesRead = client.GetStream().EndRead(asr);
+                    bytesRead = stream.EndRead(asr);
                 }
                 if (bytesRead < 1)
                 {
@@ -180,11 +176,11 @@ namespace SocketTcp.Client
                     return;
                 }
                 OnReceive(byteBuffer, bytesRead);   //分析数据包内容，抛给逻辑层
-                lock (client.GetStream())
+                lock (stream)
                 {
                     //分析完，再次监听服务器发过来的新消息
                     Array.Clear(byteBuffer, 0, byteBuffer.Length);   //清空数组
-                    client.GetStream().BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), null);
+                    stream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), null);
                 }
             }
             catch (Exception)
@@ -215,9 +211,9 @@ namespace SocketTcp.Client
             {
                 outStream.EndWrite(ar);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                RaiseWriteException(ex);
+                RaiseServerDisconnected();
             }
         }
 
