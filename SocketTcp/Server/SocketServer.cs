@@ -9,11 +9,6 @@ namespace SocketTcp.Server
 {
     public class SocketServer
     {
-        /// <summary>
-        /// 当前的连接的客户端数
-        /// </summary>
-        private int _clientCount;
-
         private object lockObject = new object();
 
         /// <summary>
@@ -115,16 +110,28 @@ namespace SocketTcp.Server
                 return;
             }
 
-            TcpClient client = listener.EndAcceptTcpClient(ar);
-            lock (lockObject)
+            TcpClient client = null;
+            try
             {
-                clients.Add(client);
-                _clientCount++;
-                RaiseClientConnected(client);
+                client = listener.EndAcceptTcpClient(ar);
+            }
+            catch (Exception)
+            {
+
             }
 
-            NetworkStream outStream = client.GetStream();
-            outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
+            if (client != null)
+            {
+                lock (lockObject)
+                {
+                    clients.Add(client);
+                    RaiseClientConnected(client);
+                }
+
+                NetworkStream outStream = client.GetStream();
+                outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
+            }
+
             listener.BeginAcceptTcpClient(new AsyncCallback(AcceptTcpClient), null);
         }
 
@@ -295,12 +302,10 @@ namespace SocketTcp.Server
 
         private void CloseAllClient()
         {
-            foreach (TcpClient client in clients)
+            while (clients.Count > 0)
             {
-                Close(client);
+                Close(clients[0]);
             }
-            _clientCount = 0;
-            clients.Clear();
         }
 
         public void Close(TcpClient client)
@@ -309,7 +314,6 @@ namespace SocketTcp.Server
             {
                 client.Close();
                 clients.Remove(client);
-                _clientCount--;
             }
         }
     }
