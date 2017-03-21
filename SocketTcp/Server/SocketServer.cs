@@ -110,15 +110,7 @@ namespace SocketTcp.Server
                 return;
             }
 
-            TcpClient client = null;
-            try
-            {
-                client = listener.EndAcceptTcpClient(ar);
-            }
-            catch (Exception)
-            {
-
-            }
+            TcpClient client = listener.EndAcceptTcpClient(ar);
 
             if (client != null)
             {
@@ -128,11 +120,26 @@ namespace SocketTcp.Server
                     RaiseClientConnected(client);
                 }
 
-                NetworkStream outStream = client.GetStream();
-                outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
+                try
+                {
+                    NetworkStream outStream = client.GetStream();
+                    outStream.BeginRead(byteBuffer, 0, MAX_READ, new AsyncCallback(OnRead), client);
+                }
+                catch (Exception)
+                {
+                    RaiseClientDisconnected(client);
+                }
             }
 
-            listener.BeginAcceptTcpClient(new AsyncCallback(AcceptTcpClient), null);
+            try
+            {
+                listener.BeginAcceptTcpClient(new AsyncCallback(AcceptTcpClient), null);
+            }
+            catch (Exception)
+            {
+                Stop();
+                Start();
+            }
         }
 
         /// <summary>
