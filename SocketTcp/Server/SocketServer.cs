@@ -110,7 +110,16 @@ namespace SocketTcp.Server
                 return;
             }
 
-            TcpClient client = listener.EndAcceptTcpClient(ar);
+            TcpClient client = null;
+            try
+            {
+                //有时候会处罚异常
+                client = listener.EndAcceptTcpClient(ar);
+            }
+            catch (Exception)
+            {
+
+            }
 
             if (client != null)
             {
